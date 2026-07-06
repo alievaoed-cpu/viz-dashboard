@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Статус объектов ВИЗ — 2026</title>
+<style>
+  :root{--bg:#F7F9FC;--s:#fff;--b:#E2E8F0;--t:#1A202C;--m:#718096;
+    --a:#1F4E79;--al:#EBF2FA;--td:#FFFBEB;--we:#F4F6F9;--alt:#F8FAFC;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--t);font-size:13px}
+
+  .hdr{background:var(--a);color:#fff;padding:11px 18px;display:flex;align-items:center;
+    justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .hdr h1{font-size:15px;font-weight:700}
+  .hdr .sub{font-size:10px;opacity:.55;margin-top:2px}
+  .upd-btn{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);color:#fff;
+    border-radius:6px;padding:5px 13px;font-size:12px;cursor:pointer;
+    display:flex;align-items:center;gap:6px;transition:.15s}
+  .upd-btn:hover{background:rgba(255,255,255,.22)}
+
+  /* Drop zone overlay */
+  .drop-overlay{position:fixed;inset:0;background:rgba(31,78,121,.92);z-index:999;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:#fff;gap:16px;transition:.2s;pointer-events:none;opacity:0}
+  .drop-overlay.show{opacity:1;pointer-events:all}
+  .drop-overlay.drag-over{background:rgba(31,78,121,.97)}
+  .drop-box{border:3px dashed rgba(255,255,255,.5);border-radius:16px;
+    padding:48px 64px;text-align:center;cursor:pointer;transition:.2s}
+  .drop-box:hover,.drop-box.drag-over{border-color:#fff;background:rgba(255,255,255,.08)}
+  .drop-icon{font-size:48px;margin-bottom:12px}
+  .drop-title{font-size:18px;font-weight:700;margin-bottom:6px}
+  .drop-sub{font-size:13px;opacity:.65}
+  .drop-hint{font-size:11px;opacity:.45;margin-top:20px}
+  .drop-err{color:#FCA5A5;font-size:13px;margin-top:12px;display:none}
+  .drop-close{position:absolute;top:20px;right:24px;font-size:22px;cursor:pointer;opacity:.6}
+  .drop-close:hover{opacity:1}
+
+  /* How-to hint inside overlay */
+  .howto{background:rgba(255,255,255,.08);border-radius:10px;padding:14px 20px;
+    font-size:11px;line-height:1.8;opacity:.75;margin-top:8px;text-align:left;max-width:360px}
+  .howto b{opacity:1;font-weight:600}
+
+  .bar{background:var(--s);border-bottom:1px solid var(--b);padding:8px 18px;
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+    position:sticky;top:52px;z-index:90}
+  .cg{display:flex;align-items:center;gap:5px}
+  .cg label{font-size:11px;color:var(--m);font-weight:500;white-space:nowrap}
+  select,input[type=text]{border:1px solid var(--b);border-radius:6px;padding:4px 8px;
+    font-size:12px;background:var(--bg);color:var(--t);outline:none}
+  select:focus,input:focus{border-color:var(--a)}
+  .mnav{display:flex;gap:3px;flex-wrap:wrap}
+  .mb{border:1px solid var(--b);background:var(--bg);border-radius:5px;padding:3px 7px;
+    font-size:11px;cursor:pointer;color:var(--m);transition:.15s}
+  .mb:hover{border-color:var(--a);color:var(--a)}
+  .mb.on{background:var(--a);color:#fff;border-color:var(--a);font-weight:600}
+  .leg{display:flex;gap:8px;align-items:center;margin-left:auto;flex-wrap:wrap}
+  .li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--m)}
+  .ld{width:20px;height:14px;border-radius:3px;display:flex;align-items:center;
+    justify-content:center;font-size:9px;font-weight:700}
+  .sum{display:flex;gap:14px;padding:7px 18px;background:var(--s);
+    border-bottom:1px solid var(--b);font-size:12px;flex-wrap:wrap}
+  .si{display:flex;align-items:center;gap:5px}
+  .sd{width:9px;height:9px;border-radius:50%}
+  .wrap{overflow:auto;max-height:calc(100vh - 125px);padding:0 18px 20px}
+  table{border-collapse:collapse;table-layout:fixed;min-width:100%}
+  .rm th,.rd th{position:sticky;top:0;z-index:50}
+  .rm .fx,.rd .fx{z-index:60}
+  th.mh{background:var(--a);color:#fff;font-size:11px;font-weight:700;text-align:center;
+    padding:5px 2px;border-right:2px solid rgba(255,255,255,.2);letter-spacing:.04em}
+  th.dh{background:#2A5F8F;color:rgba(255,255,255,.75);font-size:9px;font-weight:500;
+    text-align:center;padding:3px 1px;border-right:1px solid rgba(255,255,255,.1)}
+  th.dh.we{background:#3A7ABF;color:rgba(255,255,255,.4)}
+  th.dh.td{background:#F59E0B;color:#fff;font-weight:700}
+  .fx{position:sticky;background:var(--a);color:#fff;font-size:10px;font-weight:600;
+    text-align:left;padding:4px 7px;border-right:2px solid rgba(255,255,255,.18)}
+  tr.gh td{background:var(--al);color:var(--a);font-weight:700;font-size:11px;
+    padding:5px 10px;border-top:2px solid var(--a);letter-spacing:.04em;text-transform:uppercase}
+  tr.gh td:first-child{position:sticky;left:0;z-index:10}
+  tr.or:hover td{filter:brightness(.97)}
+  td.cn{position:sticky;left:0;z-index:10;width:36px;text-align:center;
+    font-size:10px;color:var(--m);border-right:1px solid var(--b)}
+  td.cna{position:sticky;left:36px;z-index:10;width:210px;padding:0 7px;
+    font-size:11px;font-weight:600;border-right:1px solid var(--b);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  td.ct{position:sticky;left:246px;z-index:10;width:150px;padding:0 6px;
+    font-size:10px;color:var(--m);border-right:3px solid var(--b);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  td.dc{width:28px;text-align:center;padding:1px;border-right:1px solid var(--b);
+    vertical-align:middle;height:26px}
+  td.dc.we{background:var(--we)!important}
+  td.dc.td{background:var(--td)!important}
+  .et{display:inline-flex;align-items:center;justify-content:center;border-radius:3px;
+    font-size:8px;font-weight:800;width:22px;height:16px;cursor:default}
+  .et.m{width:30px;background:#7C3AED!important;color:#fff!important}
+  .sb{display:inline-block;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;white-space:nowrap}
+  [data-tip]{position:relative}
+  [data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:120%;left:50%;
+    transform:translateX(-50%);background:#1A202C;color:#fff;padding:5px 9px;
+    border-radius:5px;font-size:10px;z-index:200;pointer-events:none;
+    max-width:240px;white-space:pre-line;line-height:1.5}
+
+  /* Page-level drag highlight */
+  body.dragging-over .drop-overlay{opacity:1;pointer-events:all}
+</style>
+</head>
+<body>
+
+<!-- Drop overlay -->
+<div class="drop-overlay" id="dropOverlay">
+  <span class="drop-close" onclick="closeOverlay()">✕</span>
+  <div class="drop-box" id="dropBox">
+    <div class="drop-icon">📂</div>
+    <div class="drop-title">Перетащи файл сюда</div>
+    <div class="drop-sub">или нажми чтобы выбрать</div>
+    <input type="file" id="fileInput" accept=".csv" style="display:none">
+  </div>
+  <div class="howto">
+    <b>Как подготовить файл в Google Sheets:</b><br>
+    Файл → Скачать → CSV (.csv, текущий лист)<br>
+    Убедись что скачиваешь лист <b>«ВИЗ_данные»</b>
+  </div>
+  <div class="drop-err" id="dropErr"></div>
+</div>
+
+<div class="hdr">
+  <div>
+    <h1>Статус объектов ВИЗ — 2026</h1>
+    <div class="sub" id="dateLabel">Данные на: 06.07.2026</div>
+  </div>
+  <button class="upd-btn" onclick="openOverlay()">⟳ Обновить данные</button>
+</div>
+
+<div class="bar">
+  <div class="cg"><label>Период:</label><div class="mnav" id="mnav"></div></div>
+  <div class="cg"><label>Статус:</label>
+    <select id="fs"><option value="">Все</option>
+      <option>В работе</option><option>Приостановка</option><option>Готово</option>
+    </select></div>
+  <div class="cg"><label>Визер:</label>
+    <select id="ft"><option value="">Все</option></select></div>
+  <div class="cg"><input type="text" id="fn" placeholder="Поиск…" style="width:140px"></div>
+  <div class="leg">
+    <div class="li"><div class="ld" style="background:#3B82F6;color:#fff">ИД</div>Исх. данные</div>
+    <div class="li"><div class="ld" style="background:#DC2626;color:#fff">ДЛ</div>Дедлайн</div>
+    <div class="li"><div class="ld" style="background:#166534;color:#DCFCE7">СД</div>Сдача</div>
+    <div class="li"><div class="ld" style="background:#92400E;color:#FEF3C7">ПР</div>Правки</div>
+  </div>
+</div>
+
+<div id="sumbar" class="sum"></div>
+
+<div class="wrap">
+  <table id="tbl">
+    <thead>
+      <tr class="rm" id="rm">
+        <th class="fx" style="left:0;width:36px">№</th>
+        <th class="fx" style="left:36px;width:210px">Объект</th>
+        <th class="fx" style="left:246px;width:150px;border-right:3px solid rgba(255,255,255,.35)">Визер / Команда</th>
+      </tr>
+      <tr class="rd" id="rd">
+        <th class="fx" style="left:0;width:36px"></th>
+        <th class="fx" style="left:36px;width:210px"></th>
+        <th class="fx" style="left:246px;width:150px;border-right:3px solid rgba(255,255,255,.35)"></th>
+      </tr>
+    </thead>
+    <tbody id="tb"></tbody>
+  </table>
+</div>
+
+<script>
+let OBJS = [{"num": "1", "name": "Суд Новочерёмушкинский", "status": "Готово", "team": "Нагорный И.А. и ко", "evMap": {"2026-04-03": [{"type": "ПР", "note": ""}], "2026-04-06": [{"type": "СД", "note": ""}]}}, {"num": "2", "name": "СИТ центр", "status": "Готово", "team": "Нагорный И.А. и ко / Насекин А.Д.", "evMap": {}}, {"num": "5", "name": "Шоссейная 90", "status": "Готово", "team": "Нагорный И.А. и ко", "evMap": {"2026-01-21": [{"type": "ДЛ", "note": ""}, {"type": "СД", "note": ""}]}}, {"num": "11", "name": "Измайлово ПИК", "status": "В работе", "team": "Галяутдинов П.А.", "evMap": {"2026-04-08": [{"type": "ДЛ", "note": ""}]}}, {"num": "13", "name": "Ереванская_ЖК", "status": "В работе", "team": "Нагорный И.А. и ко", "evMap": {}}, {"num": "15", "name": "УДВ Чертановская", "status": "Готово", "team": "Сафронов Д.Г. / Крюкова Е.А.", "evMap": {"2026-03-06": [{"type": "ИД", "note": ""}, {"type": "СД", "note": "первая версия"}], "2026-04-03": [{"type": "ПР", "note": ""}], "2026-04-05": [{"type": "СД", "note": "после правок"}], "2026-04-09": [{"type": "ПР", "note": "повторные правки"}, {"type": "СД", "note": "финальная"}]}}, {"num": "17", "name": "Спорт Комплекс", "status": "Приостановка", "team": "Насекин А.Д.", "evMap": {}}, {"num": "19", "name": "УВД_Азовская", "status": "Готово", "team": "Татьянина Р.О. / Ломакина Ю.С.", "evMap": {"2026-01-31": [{"type": "СД", "note": ""}], "2026-02-03": [{"type": "ДЛ", "note": ""}], "2026-03-28": [{"type": "СД", "note": ""}], "2026-04-05": [{"type": "СД", "note": ""}], "2026-04-22": [{"type": "ПР", "note": ""}]}}, {"num": "20", "name": "МГУ (Ломоносов-3)", "status": "Приостановка", "team": "Насекин А.Д.", "evMap": {"2026-02-19": [{"type": "ИД", "note": ""}], "2026-04-06": [{"type": "ДЛ", "note": ""}, {"type": "СД", "note": ""}]}}, {"num": "22", "name": "Кузнецовская 7", "status": "Готово", "team": "Галяутдинов П.А.", "evMap": {"2026-03-06": [{"type": "СД", "note": ""}], "2026-03-12": [{"type": "ИД", "note": ""}], "2026-03-13": [{"type": "ПР", "note": ""}], "2026-04-22": [{"type": "ПР", "note": ""}], "2026-05-03": [{"type": "ДЛ", "note": ""}]}}, {"num": "23", "name": "Опарина", "status": "Приостановка", "team": "Крюкова Е.А.", "evMap": {"2026-03-13": [{"type": "ДЛ", "note": ""}], "2026-04-10": [{"type": "СД", "note": ""}]}}, {"num": "25", "name": "Серпухов", "status": "Готово", "team": "Сафронов Д.Г.", "evMap": {}}, {"num": "26", "name": "Тропарёво-Никульно", "status": "Приостановка", "team": "Ломакина Ю.С.", "evMap": {"2026-03-16": [{"type": "ПР", "note": ""}], "2026-03-26": [{"type": "СД", "note": ""}], "2026-04-01": [{"type": "СД", "note": ""}], "2026-04-16": [{"type": "ПР", "note": ""}], "2026-04-21": [{"type": "СД", "note": "финальная"}]}}, {"num": "27", "name": "ОВД Физкультурный проезд", "status": "Готово", "team": "Галяутдинов П.А.", "evMap": {}}, {"num": "28", "name": "ОВД_Деловая", "status": "Готово", "team": "Галяутдинов П.А.", "evMap": {"2026-04-10": [{"type": "ДЛ", "note": ""}], "2026-04-11": [{"type": "СД", "note": ""}, {"type": "ПР", "note": ""}]}}, {"num": "32", "name": "УВД Ферганская", "status": "Готово", "team": "Галяутдинов П.А.", "evMap": {"2026-03-23": [{"type": "ИД", "note": ""}], "2026-03-27": [{"type": "СД", "note": ""}], "2026-04-24": [{"type": "ДЛ", "note": ""}]}}, {"num": "34", "name": "Филимонковская", "status": "Готово", "team": "Ломакина Ю.С.", "evMap": {"2026-05-12": [{"type": "ДЛ", "note": ""}], "2026-05-30": [{"type": "СД", "note": ""}]}}, {"num": "38", "name": "Нестеренко", "status": "Готово", "team": "Сафронов Д.Г.", "evMap": {}}, {"num": "39", "name": "ФОК 9 мая Интерьеры", "status": "Готово", "team": "Ломакина Ю.С.", "evMap": {}}, {"num": "44", "name": "M1B М2В Реновация", "status": "В работе", "team": "Нагорный А.А. / Сафронов Д.Г.", "evMap": {"2026-04-06": [{"type": "СД", "note": ""}], "2026-04-18": [{"type": "ПР", "note": ""}], "2026-04-21": [{"type": "СД", "note": ""}], "2026-04-28": [{"type": "ДЛ", "note": ""}]}}, {"num": "45", "name": "Мневники", "status": "В работе", "team": "Сафронов Д.Г.", "evMap": {}}, {"num": "49", "name": "Вернадского 62", "status": "В работе", "team": "Нагорный И.А. / Галяутдинов П.А.", "evMap": {"2026-03-08": [{"type": "СД", "note": ""}], "2026-04-20": [{"type": "ДЛ", "note": ""}]}}, {"num": "54", "name": "Вороново", "status": "Готово", "team": "Нагорный И.А. и ко", "evMap": {"2026-03-06": [{"type": "СД", "note": ""}], "2026-03-16": [{"type": "СД", "note": ""}], "2026-04-01": [{"type": "ИД", "note": ""}], "2026-04-20": [{"type": "ПР", "note": ""}], "2026-04-21": [{"type": "ДЛ", "note": ""}]}}, {"num": "55", "name": "Востряковская", "status": "Готово", "team": "Нагорный И.А. и ко", "evMap": {"2026-03-13": [{"type": "СД", "note": ""}], "2026-03-24": [{"type": "ИД", "note": ""}], "2026-04-11": [{"type": "СД", "note": ""}], "2026-04-16": [{"type": "ДЛ", "note": ""}]}}, {"num": "56", "name": "Прокатная", "status": "В работе", "team": "Галяутдинов П.А.", "evMap": {"2026-03-31": [{"type": "ДЛ", "note": ""}], "2026-04-02": [{"type": "ИД", "note": ""}], "2026-04-13": [{"type": "ПР", "note": ""}], "2026-05-03": [{"type": "ДЛ", "note": "повторный"}]}}, {"num": "57", "name": "Щербинка", "status": "В работе", "team": "Ломакина Ю.С. / Вакулишина С.Ю.", "evMap": {"2026-02-15": [{"type": "СД", "note": ""}], "2026-03-06": [{"type": "СД", "note": ""}], "2026-04-03": [{"type": "ИД", "note": ""}], "2026-04-10": [{"type": "ПР", "note": ""}], "2026-04-20": [{"type": "ПР", "note": ""}]}}, {"num": "60", "name": "Эль Бабушкино", "status": "Готово", "team": "Галяутдинов П.А.", "evMap": {"2026-01-09": [{"type": "СД", "note": ""}]}}, {"num": "61", "name": "ОВД_Интерьеры", "status": "Приостановка", "team": "Нагорный А.А. и ко", "evMap": {}}, {"num": "62", "name": "Гродненская улица 6", "status": "Готово", "team": "Нагорный А.А. и ко", "evMap": {"2026-02-27": [{"type": "ИД", "note": ""}], "2026-03-28": [{"type": "ПР", "note": ""}], "2026-04-09": [{"type": "СД", "note": ""}, {"type": "ДЛ", "note": ""}]}}, {"num": "64", "name": "МФЦ Троицк", "status": "Приостановка", "team": "Крюкова Е.А.", "evMap": {"2026-02-15": [{"type": "СД", "note": ""}], "2026-04-17": [{"type": "ПР", "note": ""}], "2026-04-26": [{"type": "ИД", "note": ""}], "2026-05-17": [{"type": "ДЛ", "note": ""}]}}, {"num": "65", "name": "Лужники", "status": "В работе", "team": "Сафронов Д.Г. / Вакулишина/Крюкова/Ломакина", "evMap": {"2026-03-12": [{"type": "ИД", "note": ""}], "2026-04-02": [{"type": "ДЛ", "note": ""}]}}, {"num": "66", "name": "Подстанции_Интерьеры", "status": "В работе", "team": "Татьянина Р.О.", "evMap": {"2026-04-11": [{"type": "СД", "note": ""}]}}, {"num": "67", "name": "ЦКС УВД ТиНАО", "status": "Готово", "team": "Крюкова Е.А.", "evMap": {}}, {"num": "68", "name": "Старопетровский", "status": "Готово", "team": "Сафронов Д.Г.", "evMap": {}}, {"num": "69", "name": "Кременчукские", "status": "Готово", "team": "Нагорный А.А. и ко", "evMap": {"2026-02-14": [{"type": "ИД", "note": ""}], "2026-02-21": [{"type": "СД", "note": ""}], "2026-03-30": [{"type": "СД", "note": ""}], "2026-03-31": [{"type": "ДЛ", "note": ""}], "2026-04-22": [{"type": "ПР", "note": ""}]}}, {"num": "70", "name": "Школа на 700 Парковая", "status": "Готово", "team": "Татьянина Р.О. / Вакулишина С.Ю.", "evMap": {"2026-03-16": [{"type": "ИД", "note": ""}], "2026-03-25": [{"type": "СД", "note": ""}], "2026-04-04": [{"type": "СД", "note": "финальная"}], "2026-04-20": [{"type": "ПР", "note": ""}], "2026-04-21": [{"type": "СД", "note": ""}], "2026-04-27": [{"type": "ДЛ", "note": ""}]}}, {"num": "71", "name": "Моцарт Дмитровка", "status": "Готово", "team": "Нагорный И.А. и ко", "evMap": {"2026-01-21": [{"type": "ИД", "note": ""}], "2026-02-17": [{"type": "ДЛ", "note": ""}], "2026-03-03": [{"type": "СД", "note": ""}]}}, {"num": "72", "name": "Велфарм", "status": "Готово", "team": "Нагорный А.А. и ко", "evMap": {"2026-03-06": [{"type": "СД", "note": ""}], "2026-03-12": [{"type": "ИД", "note": ""}], "2026-04-13": [{"type": "ДЛ", "note": ""}]}}, {"num": "73", "name": "Святой Владимир", "status": "Готово", "team": "Галяутдинов П.А.", "evMap": {"2026-03-11": [{"type": "ИД", "note": ""}], "2026-03-13": [{"type": "ДЛ", "note": ""}, {"type": "СД", "note": ""}]}}, {"num": "74", "name": "ДШИ Флиера", "status": "Приостановка", "team": "Татьянина Р.О.", "evMap": {"2026-03-26": [{"type": "ИД", "note": ""}], "2026-04-06": [{"type": "ДЛ", "note": ""}]}}, {"num": "75", "name": "Веерная 1", "status": "В работе", "team": "Сафронов Д.Г.", "evMap": {"2026-03-06": [{"type": "ПР", "note": ""}], "2026-03-12": [{"type": "ИД", "note": ""}], "2026-03-23": [{"type": "СД", "note": ""}], "2026-04-10": [{"type": "СД", "note": ""}]}}, {"num": "76", "name": "КРТ Хруничева", "status": "Готово", "team": "Насекин А.Д.", "evMap": {"2026-04-01": [{"type": "СД", "note": ""}]}}, {"num": "77", "name": "Живописная", "status": "Готово", "team": "Вакулишина С.Ю.", "evMap": {"2026-03-06": [{"type": "ИД", "note": ""}], "2026-03-07": [{"type": "СД", "note": ""}]}}, {"num": "78", "name": "Коньково", "status": "Готово", "team": "Сафронов Д.Г.", "evMap": {"2026-04-01": [{"type": "ИД", "note": ""}]}}, {"num": "79", "name": "Школа на 1500 Измайлово", "status": "Готово", "team": "Нагорный А.А. и ко", "evMap": {"2026-04-27": [{"type": "ДЛ", "note": ""}]}}, {"num": "80", "name": "Грузинский Вал", "status": "Готово", "team": "Ломакина Ю.С.", "evMap": {"2026-04-05": [{"type": "ИД", "note": ""}], "2026-04-13": [{"type": "СД", "note": ""}], "2026-04-15": [{"type": "ДЛ", "note": ""}]}}, {"num": "81", "name": "Китай_Реновация", "status": "Готово", "team": "Насекин А.Д.", "evMap": {"2026-09-20": [{"type": "СД", "note": ""}]}}, {"num": "82", "name": "Квартал Кутуза", "status": "Готово", "team": "", "evMap": {"2026-05-13": [{"type": "СД", "note": ""}]}}, {"num": "83", "name": "Толбухина", "status": "Готово", "team": "Нагорный И.А. / Насекин А.Д.", "evMap": {"2026-05-14": [{"type": "СД", "note": ""}]}}, {"num": "84", "name": "Демихова", "status": "Приостановка", "team": "Нагорный И.А. / Насекин А.Д.", "evMap": {"2026-04-06": [{"type": "ИД", "note": ""}], "2026-05-30": [{"type": "ДЛ", "note": ""}]}}, {"num": "85", "name": "Никулинская 12", "status": "Готово", "team": "Нагорный И.А. и ко", "evMap": {"2026-04-06": [{"type": "ИД", "note": ""}]}}, {"num": "86", "name": "Можайское", "status": "Готово", "team": "Вакулишина С.Ю.", "evMap": {"2026-04-15": [{"type": "ДЛ", "note": ""}]}}, {"num": "87", "name": "Вороново ОМВД", "status": "В работе", "team": "Ломакина Ю.С. / Крюкова Е.А.", "evMap": {"2026-04-19": [{"type": "ИД", "note": ""}]}}, {"num": "", "name": "Бекасово", "status": "", "team": "", "evMap": {"2026-04-01": [{"type": "ИД", "note": ""}], "2026-04-21": [{"type": "ДЛ", "note": ""}]}}, {"num": "", "name": "ЦДР", "status": "Приостановка", "team": "", "evMap": {"2026-04-09": [{"type": "ИД", "note": ""}], "2026-05-07": [{"type": "ДЛ", "note": ""}]}}, {"num": "", "name": "Люблинская 56/2", "status": "", "team": "", "evMap": {"2026-04-22": [{"type": "ИД", "note": ""}], "2026-05-11": [{"type": "ДЛ", "note": ""}]}}, {"num": "", "name": "ММКЦ Коммунарка", "status": "", "team": "", "evMap": {"2026-04-26": [{"type": "ИД", "note": ""}], "2026-05-15": [{"type": "ДЛ", "note": ""}]}}, {"num": "", "name": "МГУ Ломоносов-2", "status": "В работе", "team": "Насекин А.Д. / Сафронов Д.Г.", "evMap": {}}, {"num": "", "name": "Хованский крематорий", "status": "Готово", "team": "Ломакина Ю.С.", "evMap": {}}, {"num": "", "name": "Типовая реновация Ш1 Ш2", "status": "Готово", "team": "Нагорный И.А. и ко", "evMap": {}}, {"num": "", "name": "ГКБ № 67", "status": "", "team": "", "evMap": {"2026-06-01": [{"type": "ИД", "note": ""}], "2026-06-21": [{"type": "ДЛ", "note": ""}]}}, {"num": "", "name": "Школа Прокшино", "status": "", "team": "", "evMap": {"2026-06-04": [{"type": "ИД", "note": ""}], "2026-07-31": [{"type": "ДЛ", "note": ""}]}}, {"num": "", "name": "ОМВД Внуково", "status": "", "team": "", "evMap": {"2026-05-04": [{"type": "ИД", "note": ""}], "2026-05-24": [{"type": "ДЛ", "note": ""}]}}, {"num": "", "name": "СК Выхино-Жулебино", "status": "", "team": "", "evMap": {"2026-05-24": [{"type": "ИД", "note": ""}], "2026-06-13": [{"type": "ДЛ", "note": ""}]}}];
+
+const EVS={ИД:{bg:"#3B82F6",fg:"#fff"},ДЛ:{bg:"#DC2626",fg:"#fff"},
+           СД:{bg:"#166534",fg:"#DCFCE7"},ПР:{bg:"#92400E",fg:"#FEF3C7"}};
+const SST={"Готово":{bg:"#DCFCE7",fg:"#166534"},"В работе":{bg:"#FEF9C3",fg:"#854D0E"},
+           "Приостановка":{bg:"#F1F5F9",fg:"#475569"},"":{bg:"#FEE2E2",fg:"#991B1B"}};
+const GO=["В работе","Приостановка","Готово",""];
+const GL={"В работе":"🔄 В работе","Приостановка":"⏸ Приостановка","Готово":"✅ Готово","":"— Без статуса"};
+const MN=["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
+const TODAY=new Date(2026,5,29);
+let VM=new Set(),fSt="",fTm="",fNm="";
+
+const DAYS=[];
+for(let m=0;m<12;m++){const dm=new Date(2026,m+1,0).getDate();for(let d=1;d<=dm;d++)DAYS.push(new Date(2026,m,d));}
+const ds=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const isWE=d=>d.getDay()===0||d.getDay()===6;
+const isTD=d=>ds(d)===ds(TODAY);
+
+// ── Drag & Drop ───────────────────────────────────────────────
+function openOverlay(){ document.getElementById('dropOverlay').classList.add('show'); }
+function closeOverlay(){ document.getElementById('dropOverlay').classList.remove('show'); }
+
+// Click to select
+document.getElementById('dropBox').onclick = () => document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange = e => { if(e.target.files[0]) processFile(e.target.files[0]); };
+
+// Drag onto drop box
+const dropBox = document.getElementById('dropBox');
+dropBox.ondragover = e => { e.preventDefault(); dropBox.classList.add('drag-over'); };
+dropBox.ondragleave = () => dropBox.classList.remove('drag-over');
+dropBox.ondrop = e => { e.preventDefault(); dropBox.classList.remove('drag-over'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); };
+
+// Drag anywhere on page — open overlay automatically
+document.addEventListener('dragenter', e => { if(e.dataTransfer.types.includes('Files')){ openOverlay(); } });
+
+function normDate(s){
+  s=(s||'').trim();
+  const m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if(m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return '';
+}
+function parseLine(line){
+  const vals=[];let cur='',inQ=false;
+  for(const ch of line){ if(ch==='"')inQ=!inQ; else if(ch===','&&!inQ){vals.push(cur);cur='';}else cur+=ch; }
+  vals.push(cur);
+  return vals.map(v=>v.replace(/^"|"$/g,'').trim());
+}
+function parseCSV(txt){
+  const lines=txt.trim().split('\n');
+  const hdrs=parseLine(lines[0]);
+  return lines.slice(1).map(l=>{ const v=parseLine(l); const o={}; hdrs.forEach((h,i)=>o[h]=(v[i]||'').trim()); return o; });
+}
+
+function processFile(file){
+  const err = document.getElementById('dropErr');
+  err.style.display='none';
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const rows = parseCSV(e.target.result);
+
+      // Detect format: single combined sheet OR separate (just Объекты cols)
+      const hasTip = rows.some(r => r['Тип']==='ОБЪЕКТ'||r['Тип']==='ЛОГ');
+
+      let objects=[], evMap={};
+
+      if(hasTip){
+        // Combined format: Тип | № | Название | Статус | Команда | Дата | Событие | Примечание
+        rows.forEach(r=>{
+          if(r['Тип']==='ОБЪЕКТ'){
+            objects.push({num:r['№'],name:r['Название'],status:r['Статус'],team:r['Команда'],evMap:{}});
+          } else if(r['Тип']==='ЛОГ'){
+            const name=r['Название'], d=normDate(r['Дата']), type=r['Событие'], note=r['Примечание']||'';
+            if(name&&d&&type){ if(!evMap[name])evMap[name]={}; if(!evMap[name][d])evMap[name][d]=[]; evMap[name][d].push({type,note}); }
+          }
+        });
+      } else {
+        // Fallback: just objects sheet
+        rows.forEach(r=>{ if(r['Название']) objects.push({num:r['№']||'',name:r['Название'],status:r['Статус']||'',team:r['Команда']||'',evMap:{}}); });
+      }
+
+      objects.forEach(o=>{ o.evMap=evMap[o.name]||{}; });
+
+      if(!objects.length) throw new Error('Не найдено ни одного объекта. Проверь формат файла.');
+
+      OBJS.length=0;
+      objects.forEach(o=>OBJS.push(o));
+
+      document.getElementById('dateLabel').textContent =
+        'Данные на: '+new Date().toLocaleDateString('ru-RU');
+
+      closeOverlay();
+      fillTeams();
+      render();
+    } catch(ex){
+      err.textContent='⚠ '+ex.message;
+      err.style.display='block';
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+// ── Render ────────────────────────────────────────────────────
+function initVM(){const c=TODAY.getMonth();VM=new Set([Math.max(0,c-1),c,Math.min(11,c+1)]);}
+function fillTeams(){
+  const sel=document.getElementById('ft'); const cur=sel.value;
+  sel.innerHTML='<option value="">Все</option>';
+  const s=new Set();
+  OBJS.forEach(o=>o.team.split(/[\/,]/).forEach(t=>{const tt=t.trim();if(tt)s.add(tt);}));
+  [...s].sort().forEach(t=>{const op=document.createElement('option');op.value=t;op.textContent=t;if(t===cur)op.selected=true;sel.appendChild(op);});
+}
+function vdays(){return DAYS.filter(d=>VM.has(d.getMonth()));}
+function renderMNav(){
+  const nav=document.getElementById('mnav');nav.innerHTML='';
+  const ab=document.createElement('button');ab.className='mb'+(VM.size===12?' on':'');
+  ab.textContent='Весь год';ab.onclick=()=>{VM=new Set([...Array(12).keys()]);render();};nav.appendChild(ab);
+  MN.forEach((m,i)=>{
+    const b=document.createElement('button');b.className='mb'+(VM.has(i)?' on':'');
+    b.textContent=m.slice(0,3);
+    b.onclick=()=>{if(VM.has(i)&&VM.size>1)VM.delete(i);else VM.add(i);render();};nav.appendChild(b);
+  });
+}
+function renderHdr(days){
+  const rm=document.getElementById('rm'),rd=document.getElementById('rd');
+  while(rm.children.length>3)rm.removeChild(rm.lastChild);
+  while(rd.children.length>3)rd.removeChild(rd.lastChild);
+  const mg={};days.forEach(d=>{const m=d.getMonth();if(!mg[m])mg[m]=[];mg[m].push(d);});
+  Object.keys(mg).sort((a,b)=>a-b).forEach(m=>{
+    const th=document.createElement('th');th.className='mh';th.colSpan=mg[m].length;th.textContent=MN[m];rm.appendChild(th);
+    mg[m].forEach(d=>{
+      const t=document.createElement('th');
+      t.className='dh'+(isWE(d)?' we':'')+(isTD(d)?' td':'');
+      t.textContent=d.getDate();rd.appendChild(t);
+    });
+  });
+}
+function filtered(){
+  return OBJS.filter(o=>{
+    if(fSt&&o.status!==fSt)return false;
+    if(fTm&&!o.team.includes(fTm))return false;
+    if(fNm&&!o.name.toLowerCase().includes(fNm.toLowerCase()))return false;
+    return true;
+  });
+}
+function renderBody(days,objs){
+  const tb=document.getElementById('tb');tb.innerHTML='';
+  const grps={};GO.forEach(g=>grps[g]=[]);
+  objs.forEach(o=>{const g=o.status||'';(grps[g]!==undefined?grps[g]:grps['']).push(o);});
+  let ri=0;
+  GO.forEach(g=>{
+    const go=grps[g];if(!go.length)return;
+    const gtr=document.createElement('tr');gtr.className='gh';
+    const gtd=document.createElement('td');gtd.colSpan=3+days.length;
+    gtd.textContent=GL[g]+'  ('+go.length+')';gtr.appendChild(gtd);tb.appendChild(gtr);
+    go.forEach(o=>{
+      ri++;
+      const tr=document.createElement('tr');tr.className='or';
+      const bg=ri%2===0?'var(--alt)':'var(--s)';
+      const st=SST[o.status||'']||SST[''];
+      const tn=document.createElement('td');tn.className='cn';tn.style.background=bg;tn.textContent=o.num;tr.appendChild(tn);
+      const tna=document.createElement('td');tna.className='cna';tna.style.background=bg;tna.title=o.name;
+      tna.innerHTML='<span class="sb" style="background:'+st.bg+';color:'+st.fg+'">'+(o.status||'—')+'</span> '+o.name;
+      tr.appendChild(tna);
+      const tt=document.createElement('td');tt.className='ct';tt.style.background=bg;tt.title=o.team;tt.textContent=o.team;tr.appendChild(tt);
+      days.forEach(d=>{
+        const td=document.createElement('td');
+        td.className='dc'+(isWE(d)?' we':'')+(isTD(d)?' td':'');
+        if(!isWE(d)&&!isTD(d))td.style.background=bg;
+        const evs=(o.evMap&&o.evMap[ds(d)])||[];
+        if(evs.length){
+          const types=evs.map(e=>e.type);
+          const notes=evs.map(e=>e.note).filter(Boolean);
+          const tag=document.createElement('div');
+          tag.className='et'+(types.length>1?' m':'');
+          if(types.length===1){const s=EVS[types[0]]||{bg:'#888',fg:'#fff'};tag.style.background=s.bg;tag.style.color=s.fg;}
+          tag.textContent=types.length>1?types.join('+'):types[0];
+          tag.setAttribute('data-tip',[o.name,d.toLocaleDateString('ru-RU',{day:'2-digit',month:'long'}),types.join(', '),...(notes.length?['📝 '+notes.join('; ')]:[])] .join('\n'));
+          td.appendChild(tag);
+        }
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+  });
+}
+function renderSum(objs){
+  const c={"В работе":0,"Приостановка":0,"Готово":0,"":0};
+  objs.forEach(o=>{const g=o.status||'';c[g]=(c[g]||0)+1;});
+  const col={"В работе":"#854D0E","Приостановка":"#475569","Готово":"#166534","":"#991B1B"};
+  const lbl={"В работе":"В работе","Приостановка":"Приостановка","Готово":"Готово","":"Без статуса"};
+  document.getElementById('sumbar').innerHTML=
+    '<span style="color:var(--m);font-weight:600">Объектов: '+objs.length+'</span>'+
+    Object.entries(c).filter(([,v])=>v>0).map(([s,n])=>
+      '<div class="si"><div class="sd" style="background:'+col[s]+'"></div><span>'+lbl[s]+': <b>'+n+'</b></span></div>'
+    ).join('');
+}
+function render(){
+  const days=vdays(),objs=filtered();
+  renderMNav();renderHdr(days);renderBody(days,objs);renderSum(objs);
+}
+document.getElementById('fs').onchange=e=>{fSt=e.target.value;render();};
+document.getElementById('ft').onchange=e=>{fTm=e.target.value;render();};
+document.getElementById('fn').oninput=e=>{fNm=e.target.value;render();};
+initVM();fillTeams();render();
+</script>
+</body>
+</html>
