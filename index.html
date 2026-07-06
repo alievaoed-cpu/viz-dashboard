@@ -183,44 +183,43 @@ async function loadFromSheets(){
   const icon=document.getElementById('btnIcon');
   const err=document.getElementById('err');
   btn.classList.add('busy');
-  icon.outerHTML='<span id="btnIcon" class="spinner"></span>';
+  document.getElementById('btnIcon').innerHTML='<span class="spinner"></span>';
   err.classList.remove('on');
 
   try{
-    const pubBase=`https://docs.google.com/spreadsheets/d/e/2PACX-1vRxbjkBiLuNZ3_dOGIH_6RTIqvJOJy2i3DFfFxlBzhAXqbEQ1jrHtopiHnEWEF1X-Tm6qiBgGzV2L-l/pub?output=csv`;
-    const [objTxt,logTxt]=await Promise.all([
-      fetch(`${pubBase}&gid=${GID_OBJ}`).then(r=>r.text()),
-      fetch(`${pubBase}&gid=${GID_LOG}`).then(r=>r.text()),
-    ]);
+    const url=`https://docs.google.com/spreadsheets/d/e/2PACX-1vQgMDf8HNOSKvLFctjYVF66A4Qfstq_bddGdSu9w2ynkPWOkDVgS5GdM_SWXV0Fzm7kzzmSZdStMr6l/pub?output=csv&gid=430997677`;
+    const r=await fetch(url);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const txt=await r.text();
+    if(txt.includes('<html')) throw new Error('Таблица недоступна. Убедись что она опубликована.');
 
-    if(objTxt.includes('<html')||logTxt.includes('<html'))
-      throw new Error('Таблица недоступна. Убедись что она опубликована.');
+    const rows=parseCSV(txt);
+    const objects=[], evMap={};
 
-    const objRows=parseCSV(objTxt);
-    const logRows=parseCSV(logTxt);
-
-    const evMap={};
-    logRows.forEach(r=>{
-      const name=(r['Название']||'').trim();
-      const d=normDate(r['Дата']||'');
-      const type=(r['Тип']||'').trim();
-      const note=(r['Примечание']||'').trim();
-      if(!name||!d||!type)return;
-      if(!evMap[name])evMap[name]={};
-      if(!evMap[name][d])evMap[name][d]=[];
-      evMap[name][d].push({type,note});
+    rows.forEach(r=>{
+      if(r['Тип']==='ОБЪЕКТ'){
+        objects.push({num:r['№']||'',name:r['Название']||'',status:r['Статус']||'',team:r['Команда']||'',evMap:{}});
+      } else if(r['Тип']==='ЛОГ'){
+        const name=(r['Название']||'').trim();
+        const d=normDate(r['Дата']||'');
+        const type=(r['Событие']||'').trim();
+        const note=(r['Примечание']||'').trim();
+        if(name&&d&&type){
+          if(!evMap[name])evMap[name]={};
+          if(!evMap[name][d])evMap[name][d]=[];
+          evMap[name][d].push({type,note});
+        }
+      }
     });
 
+    if(!objects.length) throw new Error('Не найдено объектов. Проверь формат таблицы.');
+
+    objects.forEach(o=>{o.evMap=evMap[o.name]||{};});
     OBJS.length=0;
-    objRows.forEach(r=>{
-      const name=(r['Название']||'').trim();
-      if(!name)return;
-      OBJS.push({num:(r['№']||'').trim(),name,status:(r['Статус']||'').trim(),
-                 team:(r['Команда']||'').trim(),evMap:evMap[name]||{}});
-    });
+    objects.forEach(o=>OBJS.push(o));
 
     document.getElementById('dateLabel').textContent=
-      'Обновлено: '+new Date().toLocaleTimeString('ru-RU',{day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'});
+      'Обновлено: '+new Date().toLocaleString('ru-RU',{day:'2-digit',month:'long',hour:'2-digit',minute:'2-digit'});
     fillTeams();render();
   }catch(e){
     err.textContent='⚠ '+e.message;
@@ -228,7 +227,7 @@ async function loadFromSheets(){
     document.getElementById('dateLabel').textContent='Ошибка загрузки — показаны последние данные';
   }finally{
     btn.classList.remove('busy');
-    document.getElementById('btnIcon').outerHTML='<span id="btnIcon">⟳</span>';
+    document.getElementById('btnIcon').innerHTML='⟳';
   }
 }
 
